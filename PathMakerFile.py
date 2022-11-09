@@ -49,7 +49,7 @@ MAP_FILENAME = "new_england height map.jpg"
 
 
 class PathMaker:
-    def __init__(self):
+    def __init__(self, filename=None):
         """
         # *********************
         # NOTE: This section of code would have allowed you to pick the file with a GUI dialog, but is blocking
@@ -62,7 +62,9 @@ class PathMaker:
         root.destroy()
         # *********************
         """
-        self.original_map: np.ndarray = cv2.imread(MAP_FILENAME, cv2.IMREAD_GRAYSCALE)  # load the image file
+        if filename is None:
+            filename = MAP_FILENAME
+        self.original_map: np.ndarray = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)  # load the image file
         self.drawing_map: np.ndarray = cv2.cvtColor(self.original_map, cv2.COLOR_GRAY2BGR)  # convert it into color.
         print(f"Map loaded. {self.drawing_map.shape =}")
 
@@ -259,6 +261,10 @@ class PathMaker:
         # -----------------------------------------
         # TODO: You should write this method
         #       hint: make use of self.set_color_at_rc()
+        p = self.start_point_r_c
+        while self.best_g[p[0],p[1]] != 0:
+            self.set_color_at_rc(color, p)
+            p = self.previous_point[p[0],p[1]]
 
 
         # -----------------------------------------
@@ -349,8 +355,8 @@ class PathMaker:
 
     def draw_heat_map(self):
         """
-        An optional debugging tool that might be helpful - it draws a visual representation of self. in a window called
-        "Heat".
+        An optional debugging tool that might be helpful - it draws a visual representation of self.best_g. in a window
+        called "Heat".
         I wouldn't do this EVERY frame... it will slow the search down A LOT. But now and then it might be helpful.
         :return: None
         """
