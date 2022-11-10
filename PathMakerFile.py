@@ -244,7 +244,7 @@ class PathMaker:
         while self.waiting_for_click:
             cv2.waitKey(1)
 
-    def display_path(self, path_terminator: Tuple[int, int], color: Tuple[int, int, int] = (0, 192, 255)):
+    def display_path(self, path_terminator: Tuple[int, int]=None, color: Tuple[int, int, int] = (0, 192, 255)):
         """
         Draws the path tracing backward from path_terminator.
 
@@ -261,10 +261,10 @@ class PathMaker:
         # -----------------------------------------
         # TODO: You should write this method
         #       hint: make use of self.set_color_at_rc()
-        p = self.start_point_r_c
-        while self.best_g[p[0],p[1]] != 0:
+        p = path_terminator
+        while self.best_g[p[0], p[1]] != 0:
             self.set_color_at_rc(color, p)
-            p = self.previous_point[p[0],p[1]]
+            p = self.previous_point[p[0], p[1]]
 
 
         # -----------------------------------------
