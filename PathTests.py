@@ -1,11 +1,12 @@
 import unittest
 import cv2
 import numpy as np
+
+import PathMakerFile
 from PathMakerFile import PathMaker, MAP_FILENAME
 
 class MyTestCase(unittest.TestCase):
     def test_display_path(self):
-
         pm = PathMaker(filename="40x40Gray.jpg")
         best_g_array = \
             [[999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999,
@@ -266,6 +267,24 @@ class MyTestCase(unittest.TestCase):
 
         self.assertEqual(True, True)  # add assertion here
 
+
+    def test_find_straight_path(self):
+        pm = PathMaker(filename="Small_picture.jpg")
+        pm.start_point_x_y = (17, 21)
+        pm.start_point_r_c = (21, 17)
+        pm.end_point_x_y = (7, 28)
+        pm.end_point_r_c = (28, 7)
+        PathMakerFile.ALPHA = 0.0
+        path = pm.perform_search()
+        pm.reset()
+        pm.draw_start_point()
+        pm.draw_end_point()
+        pm.display_path(path)
+        pm.show_map()
+        print("I've just displayed a window. It should show a straight line from start to finish."
+              "Click in it and press any key to 'pass' this test.")
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     unittest.main()
