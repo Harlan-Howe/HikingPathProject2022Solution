@@ -45,7 +45,7 @@ HEAT_MAP_SCALE = 0.3
 MAP_FILENAME = "new_england height map.jpg"
 # MAP_FILENAME = "volcanoes - columbia river.jpg"
 # MAP_FILENAME = "USA heightmap reduced.jpg"
-MAP_FILENAME = "Small_picture.jpg"
+# MAP_FILENAME = "Small_picture.jpg"
 
 
 
