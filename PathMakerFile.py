@@ -1,3 +1,4 @@
+import queue
 import time
 
 import cv2
@@ -28,8 +29,9 @@ class CostModeType(Enum):
 
 
 # ------------------------------------------
-# TODO: Pick one of the options listed above (& tinker with them later to see whether your results make sense.)
+# TODO #1: Pick one of the options listed above (& tinker with them later to see whether your results make sense.)
 #  ... or invent your own, by adding an option to the enumerator and implementing it in the cost() method.
+# Note: the tests will override your choice with HIGH_EXPENSIVE, so this is just if you are running this file.
 
 COST_MODE: CostModeType = CostModeType.HIGH_EXPENSIVE
 # -------------------------------------------
@@ -260,13 +262,12 @@ class PathMaker:
             return
         pt: Tuple[int, int] = deepcopy(path_terminator)
         # -----------------------------------------
-        # TODO: You should write this method
-        #       hint: make use of self.set_color_at_rc()
+        # TODO #2: You should write this method
+        #       hint: make use of self.set_color_at_rc(color, point)
         p = path_terminator
         while self.best_g[p[0], p[1]] != 0:
-            self.set_color_at_rc(color, p)
-            p = self.previous_point[p[0], p[1]]
-
+                self.set_color_at_rc(color, p)
+                p = self.previous_point[p[0], p[1]]
 
         # -----------------------------------------
 
@@ -323,7 +324,7 @@ class PathMaker:
         """
         result = 0
         # ------------------------------------------
-        # TODO: You should write this method
+        # TODO #3: You should write this method
         #  I recommend using the euclidean or manhattan distance from point to self.end_point_r_c.
 
         result = (abs(point[0]-self.end_point_r_c[0])+abs(point[1]-self.end_point_r_c[1])) * 0.707
@@ -334,7 +335,7 @@ class PathMaker:
     def get_neighbors(self, pt: Tuple[int, int]) -> List[Tuple[Tuple[int, int], float]]:
         """
         :param pt: an in-bounds point as (r,c)
-        :return: a list of points to investigate along with a weight corresponding
+        :return: a list of in-bounds points to investigate along with a weight corresponding
         to the distance from pt to this point.
         """
         neighbors: List[Tuple[Tuple[int, int], float]] = []
@@ -436,6 +437,9 @@ class PathMaker:
         start: Tuple[int, int] = self.start_point_r_c
         end: Tuple[int, int] = self.end_point_r_c
 
+        self.draw_start_point()
+        self.draw_end_point()
+
         # I recommend that you use a list of two-element lists for frontier, where the first element is the "f" value,
         # and the second is the point (a two-element list in its own right). If you tell frontier to .sort(), it will
         # sort by the first element, which allows you to make this act like a Priority Queue, but one that you can
@@ -460,29 +464,23 @@ class PathMaker:
         self.best_g: Optional[np.ndarray] = np.ones((self.original_map.shape[0], self.original_map.shape[1]),
                                                     dtype=float)
         self.best_g *= 9E9 #start all points at 9 * 10**9.
+        count = 0
 
         # ------------------------------------------
-        # TODO: You need to write the rest of this method.
+        # TODO #4: You need to write the rest of this method.
         # consider what you need to do before you loop through the search cycle.
         # &&&&&&&&&&&&&&&&&&& HOWE CODE
-        frontier: List[Tuple[float, Tuple[int, int]]] = []
-        frontier.append((self.heuristic(self.start_point_r_c), self.start_point_r_c))
-
-        visited: List[Tuple[int, int]] = []
+        frontier: queue.PriorityQueue[Tuple[float, Tuple[int, int]]] = queue.PriorityQueue()
+        frontier.put((self.heuristic(self.start_point_r_c), self.start_point_r_c))
+        # visited: List[Tuple[int, int]] = []
         result: List[Tuple[int, int]] = None
         self.best_g[self.start_point_r_c[0], self.start_point_r_c[1]] = 0
-        while len(frontier) > 0:
-            frontier.sort()
-            f, pt = frontier.pop(0)
+        while not frontier.empty():
+
+            f, pt = frontier.get()
 
             if pt == self.end_point_r_c:
-                result = []
-                p = self.end_point_r_c
-                while p[0] != self.start_point_r_c[0] or p[1] != self.start_point_r_c[1]:
-                    result.append(p)
-                    p = self.previous_point[p[0],p[1]]
-                result.append(self.start_point_r_c)
-                break
+                return pt
 
             # if pt in visited:
             #     continue
@@ -497,17 +495,17 @@ class PathMaker:
                 if g2 < self.best_g[pt2[0], pt2[1]]:
                     self.best_g[pt2[0], pt2[1]] = g2
                     self.previous_point[pt2[0], pt2[1]] = pt
-                    frontier.append((f2, pt2))
+                    frontier.put((f2, pt2))
 
-            visited.append(pt)
+            # visited.append(pt)
 
 
 
         # loop while there are still elements in frontier.
 
 
-        # # Suggested - if you are using the List as a priority queue, you might find this code helpful.
-        # # this is the equivalent of popping from a minheap priority queue.... sorted by the first value in the list.
+        # Suggested - if you are using the List as a priority queue, you might find this code helpful.
+        # this is the equivalent of popping from a minheap priority queue.... sorted by the first value in the list.
         # # ---------------------
         # frontier.sort()
         # f, pt = frontier.pop(0)
@@ -515,7 +513,8 @@ class PathMaker:
 
         # # optional... every few (1000?) loops, draw the path that leads to pt and update a "heat map" that shows what
         # #  self.best_g looks like. You might find this interesting to observe what is going on as the computer works.
-            if len(visited) % 1000 == 0:
+            count += 1
+            if count % 1000 == 0:
                 self.display_path(pt,(random.randint(64,255),random.randint(64,255),random.randint(64,255)))
                 self.show_map()
                 self.draw_heat_map()
@@ -523,7 +522,7 @@ class PathMaker:
                 cv2.waitKey(1)
 
         # ------------------------------------------
-        print(f"{len(visited)=}")
+        print(f"{count=}")
 
         return result
 
