@@ -6,6 +6,8 @@ import PathMakerFile
 from PathMakerFile import PathMaker, CostModeType
 
 class MyTestCase(unittest.TestCase):
+
+    @unittest.skip("Activate this when you have written perform_search().")
     def test_1_display_path(self):
         pm = PathMaker(filename="40x40Gray.jpg")
         best_g_array = \
@@ -267,7 +269,7 @@ class MyTestCase(unittest.TestCase):
 
         self.assertEqual(True, True)  # add assertion here
 
-
+    @unittest.skip("Activate this when you have written perform_search().")
     def test_2_find_straight_path(self):
         pm = PathMaker(filename="Small_picture.jpg")
         PathMakerFile.COST_MODE = CostModeType.HIGH_EXPENSIVE
@@ -292,6 +294,7 @@ class MyTestCase(unittest.TestCase):
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
+    @unittest.skip("Activate this when you have written perform_search().")
     def test_3_find_river_path(self):
         pm = PathMaker(filename="Small_picture.jpg")
         PathMakerFile.COST_MODE = CostModeType.HIGH_EXPENSIVE
@@ -316,6 +319,7 @@ class MyTestCase(unittest.TestCase):
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
+    # @unittest.skip("Activate this when you have written perform_search() and are satisfied with tests 2 & 3..")
     def test_4_big_test(self):
         pm = PathMaker(filename="new_england height map.jpg")
         PathMakerFile.COST_MODE = CostModeType.HIGH_EXPENSIVE
@@ -324,9 +328,9 @@ class MyTestCase(unittest.TestCase):
         pm.end_point_x_y = (20, 340)
         pm.end_point_r_c = (340, 20)
         PathMakerFile.ALPHA = 50
-        path = pm.perform_search()
-        if path is not None:
-            print(f"Found path with length {len(path)}.")
+        endpoint = pm.perform_search()
+        if endpoint is not None:
+            print(f"Found path.")
         else:
             print("No path found.")
         pm.reset()
@@ -339,6 +343,7 @@ class MyTestCase(unittest.TestCase):
             "Click in it and press any key to 'pass' this test.")
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+
 
 if __name__ == '__main__':
     unittest.main()
