@@ -36,7 +36,7 @@ COST_MODE: CostModeType = CostModeType.HIGH_EXPENSIVE
 
 # Play with this number to decide how important the altitude data is (i.e.,how willing you are to go around unpleasant
 # features in the terrain.)
-ALPHA = 1.0
+ALPHA = 50.0
 
 # Cosmetic: tinker with this to change the lateral expansion of the colors within the heat map.
 HEAT_MAP_SCALE = 0.3
@@ -309,6 +309,8 @@ class PathMaker:
                 result = dist
 
         assert (result > 0, "The cost function must always produce positive numbers.")
+        assert (result >= dist, "The cost function must be at least as big as the horizontal displacement to the "
+                                "finish.")
         return result
 
     def heuristic(self, point: Tuple[int, int]) -> float:
@@ -324,7 +326,7 @@ class PathMaker:
         # TODO: You should write this method
         #  I recommend using the euclidean or manhattan distance from point to self.end_point_r_c.
 
-
+        result = (abs(point[0]-self.end_point_r_c[0])+abs(point[1]-self.end_point_r_c[1])) * 0.707
 
         # ------------------------------------------
         return result
@@ -462,6 +464,43 @@ class PathMaker:
         # ------------------------------------------
         # TODO: You need to write the rest of this method.
         # consider what you need to do before you loop through the search cycle.
+        # &&&&&&&&&&&&&&&&&&& HOWE CODE
+        frontier: List[Tuple[float, Tuple[int, int]]] = []
+        frontier.append((self.heuristic(self.start_point_r_c), self.start_point_r_c))
+
+        visited: List[Tuple[int, int]] = []
+        result: List[Tuple[int, int]] = None
+        self.best_g[self.start_point_r_c[0], self.start_point_r_c[1]] = 0
+        while len(frontier) > 0:
+            frontier.sort()
+            f, pt = frontier.pop(0)
+
+            if pt == self.end_point_r_c:
+                result = []
+                p = self.end_point_r_c
+                while p[0] != self.start_point_r_c[0] or p[1] != self.start_point_r_c[1]:
+                    result.append(p)
+                    p = self.previous_point[p[0],p[1]]
+                result.append(self.start_point_r_c)
+                break
+
+            # if pt in visited:
+            #     continue
+
+            neighbors = self.get_neighbors(pt)
+            for pt2, d in neighbors:
+                # if pt2 in visited:
+                #     continue
+                cost = self.cost(pt, pt2, d)
+                g2 = self.best_g[pt[0], pt[1]] + cost
+                f2 = g2 + self.heuristic(pt2)
+                if g2 < self.best_g[pt2[0], pt2[1]]:
+                    self.best_g[pt2[0], pt2[1]] = g2
+                    self.previous_point[pt2[0], pt2[1]] = pt
+                    frontier.append((f2, pt2))
+
+            visited.append(pt)
+
 
 
         # loop while there are still elements in frontier.
@@ -476,15 +515,17 @@ class PathMaker:
 
         # # optional... every few (1000?) loops, draw the path that leads to pt and update a "heat map" that shows what
         # #  self.best_g looks like. You might find this interesting to observe what is going on as the computer works.
-        # if len(visited) % 1000 == 0:
-        #     self.display_path(pt,(random.randint(64,255),random.randint(64,255),random.randint(64,255)))
-        #     self.show_map()
-        #     self.draw_heat_map()
-        #     self.draw_elevation_graph(current_pt) #maybe...
-        #     cv2.waitKey(1)
+            if len(visited) % 1000 == 0:
+                self.display_path(pt,(random.randint(64,255),random.randint(64,255),random.randint(64,255)))
+                self.show_map()
+                self.draw_heat_map()
+                self.draw_elevation_graph(pt) #maybe...
+                cv2.waitKey(1)
 
         # ------------------------------------------
-        return None
+        print(f"{len(visited)=}")
+
+        return result
 
 
 # -----------------------------------------------------------------------------------------------------------------
