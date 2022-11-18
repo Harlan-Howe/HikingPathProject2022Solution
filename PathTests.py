@@ -3,10 +3,10 @@ import cv2
 import numpy as np
 
 import PathMakerFile
-from PathMakerFile import PathMaker, MAP_FILENAME
+from PathMakerFile import PathMaker, CostModeType
 
 class MyTestCase(unittest.TestCase):
-    def test_display_path(self):
+    def test_1_display_path(self):
         pm = PathMaker(filename="40x40Gray.jpg")
         best_g_array = \
             [[999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999,
@@ -268,21 +268,75 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(True, True)  # add assertion here
 
 
-    def test_find_straight_path(self):
+    def test_2_find_straight_path(self):
         pm = PathMaker(filename="Small_picture.jpg")
-        pm.start_point_x_y = (17, 21)
-        pm.start_point_r_c = (21, 17)
-        pm.end_point_x_y = (7, 28)
-        pm.end_point_r_c = (28, 7)
+        PathMakerFile.COST_MODE = CostModeType.HIGH_EXPENSIVE
+        pm.start_point_x_y = (10, 20)
+        pm.start_point_r_c = (20, 10)
+        pm.end_point_x_y = (60, 55)
+        pm.end_point_r_c = (55, 60)
         PathMakerFile.ALPHA = 0.0
         path = pm.perform_search()
+        if path is not None:
+            print(f"Found path with length {len(path)}.")
+        else:
+            print("No path found.")
         pm.reset()
         pm.draw_start_point()
         pm.draw_end_point()
-        pm.display_path(path)
+        pm.display_path(pm.end_point_r_c, (255,255,0))
         pm.show_map()
-        print("I've just displayed a window. It should show a straight line from start to finish."
+        print("I've just displayed a window. It should show a cyan direct line from start to finish made of a diagonal and/or"
+              "one horizontal or vertical line."
               "Click in it and press any key to 'pass' this test.")
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+    def test_3_find_river_path(self):
+        pm = PathMaker(filename="Small_picture.jpg")
+        PathMakerFile.COST_MODE = CostModeType.HIGH_EXPENSIVE
+        pm.start_point_x_y = (12, 35)
+        pm.start_point_r_c = (35, 12)
+        pm.end_point_x_y = (60, 15)
+        pm.end_point_r_c = (15, 60)
+        PathMakerFile.ALPHA = 50
+        path = pm.perform_search()
+        if path is not None:
+            print(f"Found path with length {len(path)}.")
+        else:
+            print("No path found.")
+        pm.reset()
+        pm.draw_start_point()
+        pm.draw_end_point()
+        pm.display_path(pm.end_point_r_c, (0, 255, 255))
+        pm.show_map()
+        print("I've just displayed a window. It should show a yellow line from start to finish that follows the dark parts"
+              "of the image."
+              "Click in it and press any key to 'pass' this test.")
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+    def test_4_big_test(self):
+        pm = PathMaker(filename="new_england height map.jpg")
+        PathMakerFile.COST_MODE = CostModeType.HIGH_EXPENSIVE
+        pm.start_point_x_y = (350, 5)
+        pm.start_point_r_c = (5, 350)
+        pm.end_point_x_y = (20, 340)
+        pm.end_point_r_c = (340, 20)
+        PathMakerFile.ALPHA = 50
+        path = pm.perform_search()
+        if path is not None:
+            print(f"Found path with length {len(path)}.")
+        else:
+            print("No path found.")
+        pm.reset()
+        pm.draw_start_point()
+        pm.draw_end_point()
+        pm.display_path(pm.end_point_r_c, (0, 255, 255))
+        pm.show_map()
+        print(
+            "I've just displayed a window. It should show the new england graph, with a path that goes down the Hudson."
+            "Click in it and press any key to 'pass' this test.")
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
